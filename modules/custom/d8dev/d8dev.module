@@ -1,0 +1,17 @@
+ <?php
+ 
+/**
+ * @file
+ * adding custom template.
+ */
+ /** * Implements hook_theme(). 
+  */ 
+ function d8dev_theme() {
+     return array(
+         'd8dev_time_display' => array(
+         'template' =>'recipe_time_display',             
+         'variables' => array('value' => NULL),
+         ),
+       ); 
+ }
+     

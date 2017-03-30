@@ -1,0 +1,31 @@
+custom_form_lists:
+  path: '/admin/content/custom_form'
+  defaults:
+    _controller: '\Drupal\Controller\AdminController::content'
+  requirements:
+    _permission: 'manage custom form'
+
+custom_form_add:
+  path: '/admin/content/custom_form/add'
+  defaults:
+    _form: '\Drupal\Form\AddForm'
+    _title: 'Create custom form'
+  requirements:
+    _permission: 'use custom form'
+
+custom_form_edit:
+  path: 'admin/content/custom_form/edit/{id}'
+  defaults:
+    _form: '\Drupal\Form\AddForm'
+    _title: 'Edit custom form'
+  requirements:
+    _permission: 'use custom form'
+
+custom_form_delete:
+  path: '/admin/content/custom_form/delete/{id}'
+  defaults:
+    _form: 'Drupal\Form\DeleteForm'
+    _title: 'Delete custom form'
+  requirements:
+    _permission: 'manage custom form'
+ 

@@ -1,0 +1,26 @@
+core: 8.x
+type: theme
+base theme: classy
+name: 'subtheme'
+description: 'classy as a basetheme'
+package: 'Core'
+
+regions:
+  header: 'Header'
+  navigation_collapsible: 'Navigation (Collapsible)'
+  banner: 'Banner'
+  breadcrumb: 'Breadcrumb'   
+  menu_description: 'Menu Description'
+  content: 'Content' 
+  sidebar_first: 'Sidebar'
+  carousel: 'Carousel'
+  footer: 'Footer one '
+  footer1: 'Footer two'
+  footer2: 'Footer three'
+  footer3: 'Footer four'
+  
+#libraries   
+libraries:
+  - 'subtheme/global-styling' 
+  - 'subtheme/global-js'
+   

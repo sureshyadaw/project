@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Provides miscellaneous functionality
+ * 
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function angulars_menu() {
+  return array(
+    'angulars' => array(
+      'title' => t('AngularJS Example'),
+      'route_name' => 'angulars',
+    ),
+  );
+}

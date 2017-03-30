@@ -1,0 +1,18 @@
+# Local development services.
+#
+# To activate this feature, follow the instructions at the top of the
+# 'example.settings.local.php' file, which sits next to this file.
+services:
+  d8dev.say_hello:
+    class: Drupal\d8dev\HelloServices
+
+services:
+  d8dev.route_subscriber:
+    class: Drupal\d8dev\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
+
+services:
+    d8dev.demo_service:
+        class: Drupal\d8dev\DemoService      
+ 

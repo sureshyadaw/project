@@ -1,0 +1,94 @@
+<?php
+/**
+ * @file
+ * Bootstrap sub-theme.
+ *
+ * Place your custom PHP code in this file.
+ */
+ 
+// * Implements hook_preprocess_breadcrumb().
+// */
+//function subtheme_preprocess_breadcrumb(&$variables){
+//  if(($node = \Drupal::routeMatch()->getParameter('node')) && $variables['breadcrumb']){
+//    $variables['breadcrumb'][] = array(
+//     'text' => $node->getTitle(),
+//     'url' => $node->URL()
+//   );
+//  }
+//}
+
+// getting logopath 
+ 
+function subtheme_preprocess_menu(&$var) { 
+    global $base_path;
+ $var['logopath'] = $base_path.drupal_get_path('theme','subtheme') .'/logo.png';
+ $var['front_page']=$base_path;
+     //print_r($var['logopath']);
+     //exit;       
+} 
+
+function subtheme_preprocess_page(&$vars) {     
+    //$vars['logopath'] = '/drupal8/sites/default/files/logo.png';//theme_get_setting('logo')['path'];
+         //print_r($vars['logopath']);  exit;
+//  
+   if ($vars['is_front']) {
+        $vars['#attached']['library'][] = 'subtheme/custom-js';
+        }
+        
+        
+ 
+        
+
+
+ 
+
+
+//   // Conditionally remove an asset.
+//  if (in_array('core/jquery', $attachments['#attached']['library'])) {
+//                                                 
+//    unset($attachments['#attached']['library'][array_search('core/jquery', $attachments['#attached']['library'])]);
+//  }   
+ 
+}
+ 
+//function subtheme_preprocess_node() {
+//
+//if (isset($variables['content']['links']['node']['#links']['node-readmore'])){
+//$variables['content']['links']['node']['#links']['node-readmore']['title'] = $variables['content']['links']['node']['#links']['node-readmore']['title']." >>>";
+//print_r("hello".$variables['content']['links']['node']['#links']['node-readmore']['title']);exit;
+//
+//}
+//}
+
+//
+//function subtheme_preprocess_links(&$variables) {
+//    if (isset($variables['links']['node-readmore'])) {
+//      $variables['links']['node-readmore']['link']['#title'] = t('Read more custom text');
+//    }
+//    print_r('hello'.$variables['content']['node-readmore']);  exit;
+//}
+//
+//
+//function subtheme_preprocess_node()
+//{
+//        if (isset($variables['content']['links']['node']['#links']['node-readmore'])){
+//                 $variables['content']['links']['node']['#links']['node-readmore']['title'] = "Full Article ";
+//                            print_r('heloo');  exit;
+//           }
+//           //$var['t']=if (isset($variables['content']['links']['node']['#links']['node-readmore']));
+//           //print_r('hello'.$variables['content']['node-readmore']);  exit;
+//            
+//}
+
+
+//function subtheme_preprocess_node(&$vars){
+//  if(isset($vars['content']['links']['node']['#links']['node-readmore'])){
+//    $vars['content']['links']['node']['#links']['node-readmore']['title'] = t('Read more →');
+//    print_r('he inside'.$vars['content']['links']['node']['#links']['node-readmore']['title']);  exit;
+//  }
+//  print_r('hel outside'.$vars['content']['links']['node']['#links']['node-readmore']['title']);  exit;
+//}
+
+ 
+
+   

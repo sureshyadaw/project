@@ -1,0 +1,10 @@
+#module_name:route_name(maps an http request in drupal)
+d8dev.my_page:
+  path: '/mypage'
+  defaults:
+    _controller: '\Drupal\d8dev\Controller\d8devController::mypage'
+    _title: 'My First Page in Drupal8'
+  requirements:
+    _permission: 'access content'
+ 
+   

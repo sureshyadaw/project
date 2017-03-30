@@ -1,0 +1,129 @@
+ 
+<div>{{ page.header }} </div>
+<div class="container-fluid ">
+
+
+
+
+    <div class="navigation-wrapper">
+        <div class="navigation"> 
+            {{ page.navigation_collapsible }} 
+        </div>
+    </div>
+    <div class="container-fluid bannerClass img-responsive">             
+            {% if page.banner %}
+            {{page.banner}}
+            {% endif %}          
+    </div>
+
+
+    <div class="section-powered-by">        
+        {% if is_front %}
+
+            {{'POWERED BY '}}
+        {% elseif not page %} 
+            {{ name}}
+        {% else %}
+            {{ node.label }}
+        {% endif %}
+    </div>
+    <div class="breadcrumbs-class">
+        {% if page.breadcrumb %}
+
+            {{ page.breadcrumb }}
+        {% endif %}
+    </div>
+
+
+    {#   main content  start  #} 
+    <div class="container">
+        <div class="row">
+            {% if page.description%}
+                {{page.description}}
+            {% endif %}
+        </div>
+    </div>
+
+
+    {% set sidebarClass = 'col-md-12' %}
+    {% if page.sidebar_first %}
+        {% set sidebarClass = 'col-md-8 col-sm-8' %}
+    {% endif %}
+    {% if page.sidebar_second %}
+        {% set sidebarClass = 'col-md-8 col-sm-8' %}
+    {% endif %}
+    {% if page.sidebar_second %}
+        {% if page.sidebar_first %}
+            {% set sidebarClass = 'col-md-4 col-sm-4' %}
+        {% endif %}
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+
+            <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+
+            <div class="layout-content {{ sidebarClass }}">
+                {{ page.content }}
+            </div> 
+
+            {% if page.sidebar_first %}
+                <aside class="layout-sidebar-first col-md-4 col-sm-4" role="complementary">
+                    {{ page.sidebar_first }}
+                    {#{{ attach_library('subtheme/jsfile') }}#}
+                    {#<button id="myid" >clickbutton</button>#}
+                     
+                </aside>
+            {% endif %}
+
+            {% if page.sidebar_second %}
+                <aside class="layout-sidebar-second col-md-4 col-sm-4" role="complementary">
+                    {{ page.sidebar_second }}
+
+                </aside>
+            {% endif %}
+        </div>
+    </div>
+    {#  end main content    #} 
+
+    <div class="container">
+        <div id="" class="carousel-class">
+            {% if page.carousel%}
+                {{page.carousel}} 
+
+            {% endif %}
+        </div>
+    </div>
+  
+    {# footer section   #}
+    <div class="footer-section">
+        <div class="container" style="margin-top:2% ">
+            <div class="row" style="margin-top:5%" >
+                {% if page.footer %}
+                    <div class="footer col-md-3 col-sm-3">
+                        {{ page.footer }}{{ attach_library('subtheme/custom-js1') }}
+                    </div>
+                {% endif %}
+                {% if page.footer1 %}
+                    <div class="footer_one col-md-3 col-sm-3">
+                        {{ page.footer1 }}
+                    </div>
+                {% endif %}
+                {% if page.footer2 %}
+                    <div class="footer_second col-md-3 col-sm-3">
+                        {{ page.footer2 }}
+                    </div>
+                {% endif %}
+                {% if page.footer3 %}
+
+                    <div class="footer_third col-md-3 col-sm-3">
+                        {{ page.footer3 }}                                                
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

@@ -1,0 +1,13 @@
+angulars:
+  version: VERSION
+  js:
+    'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.7/angular.min.js':  {type: external}
+    js/sample1.js: {}
+    js/sample2.js: {}
+    js/sample3.js: {}
+    js/sample4.js: {}
+    js/sample5.js: {}
+    js/sample.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

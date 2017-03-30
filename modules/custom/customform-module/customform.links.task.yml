@@ -1,0 +1,4 @@
+custom_form_list:
+  title: Custom Form 
+  route_name: custom_form_lists
+  base_route: system.admin_content

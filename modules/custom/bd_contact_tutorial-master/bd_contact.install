@@ -1,0 +1,73 @@
+<?php
+use Drupal\Core\Database\Database;
+function bd_contact_schema() {
+  $schema['bd_contact'] = array(
+    'fields' => array(
+      'id'=>array(
+        'type'=>'serial',
+        'not null' => TRUE,
+      ),
+      'name'=>array(
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+      ),
+        'email'=>array(
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+      ),
+//        'phone'=>array(
+//        'type' => 'int',
+//        'size' => 'small',
+//        'not null' => TRUE,
+//      ),
+//        'married'=>array(
+//        'type' => 'int',
+//        'size' => 'tiny',
+//        'not null' => TRUE,
+//      ),
+//        'submittedtime'=>array(
+//        'type' => 'datetime',
+//            'default'=>'TIMESTAMP'
+//        'not null' => TRUE,
+//      ),        
+      'message'=>array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'mysql_type' => 'timestamp',
+        'not null' => TRUE
+      )
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+function bd_contact_enable() {
+  db_query('
+    ALTER TABLE {bd_contact} 
+    MODIFY created TIMESTAMP NOT NULL 
+    DEFAULT CURRENT_TIMESTAMP 
+    ON UPDATE CURRENT_TIMESTAMP'
+  );
+}
+
+
+//https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Extension!module.api.php/function/hook_update_N/8.2.x
+function bd_contact_update_8000()
+{
+     $spec = array(
+    'type' => 'varchar',
+    'description' => "New Col",
+    'length' => 20,
+    'not null' => FALSE,
+  ); 
+ $schema = Database::getConnection()->schema();
+ $schema->addField('bd_contact', 'newcol', $spec);
+}
+ 

@@ -1,0 +1,5 @@
+name: Custom Form
+description: 'Custom Form module with creating table and saving dadas into db '
+type: module
+core: 8.x
+package: Custom

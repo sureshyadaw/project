@@ -1,0 +1,6 @@
+name: 'AngularJS Example'
+description: 'Personal AngularJS Basic Examples'
+core: 8.x
+package: Custom
+version: '8.x-0.1'
+type: module

@@ -1,0 +1,9 @@
+angulars:
+  path: '/angulars'
+  defaults:
+    _controller: '\Drupal\angulars\Controller\AngularsController::content'
+    _title: 'AngularJS Basic Examples'
+  requirements:
+    _permission: 'access content'
+
+

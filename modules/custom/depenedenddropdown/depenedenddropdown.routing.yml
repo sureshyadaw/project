@@ -1,0 +1,21 @@
+depenedenddropdown.form:
+    path: 'admin/depenedenddropdown'
+    defaults:
+        _form: 'Drupal\depenedenddropdown\Form\depenedenddropdownForm'
+        _title: 'depenedenddropdown Example'
+    requirements:
+        _permission: 'access administration pages'
+#contact_list:
+#  path: '/admin/content/contact_form'
+#  defaults:
+#    _controller: '\Drupal\depenedenddropdown\Controller\AdminController::content'
+#  requirements:
+#    _permission: 'manage contact forms'
+
+#contact_add:
+#  path: '/admin//bd_contact/add'
+#  defaults:
+#    _form: '\Drupal\depenedenddropdown\Form\AddForm'
+#    _title: 'Create contact'
+#  requirements:
+#    _permission: 'use contact form'        

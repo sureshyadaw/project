@@ -1,0 +1,11 @@
+#machine name, human readable title and description  
+manage bd contact forms:
+  title: 'Access to manage bd_contact'
+  description: 'bd contact descriptiopn..' 
+
+#'View, edit and delete all content regardless of permission restrictions.'
+#  restrict access: true
+#  
+  
+#permission_callbacks:
+#  - \Drupal\node\NodePermissions::nodeTypePermissions

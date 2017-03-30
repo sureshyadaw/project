@@ -1,0 +1,50 @@
+<?php
+
+function depenedenddropdown_schema() {
+   $schema['a_counry_state_tbl'] = array(
+    'fields' => array(
+      'a_country_state_id'=>array(
+        'type'=>'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,  
+      ),
+      'name'=>array(
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+      ),
+      'country_id'=>array(
+        'type' => 'int',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),   
+       'state_id'=>array(
+        'type' => 'int', 
+        'not null' => TRUE,
+      ),
+      'city_id'=>array(
+        'type' => 'int', 
+      ),
+      'gender'=>array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+        ),
+    'primary key' => array('a_country_state_id'),
+  );
+ 
+     
+
+  return $schema;
+}
+function depenedenddropdown_install() {
+// Use schema API to create database table.
+   drupal_install_schema('a_counry_state_tbl');
+}
+
+
+function depenedenddropdown_uninstall() {
+// Remove tables.
+   drupal_uninstall_schema('a_counry_state_tbl');
+}
