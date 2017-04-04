@@ -9,11 +9,10 @@
     'clearfix',
   ]
 %}
-
  
-<article{{ attributes.addClass(classes) }}>
 
-  {{ title_prefix }}
+<article{{ attributes.addClass('classes','delicious-contentS') }}> 
+    {{ title_prefix }}
   {% if not page %}
     <h2{{ title_attributes }}>
       <a href="{{ url }}" rel="bookmark">{{ label }}</a>

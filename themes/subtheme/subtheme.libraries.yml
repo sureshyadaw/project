@@ -1,24 +1,58 @@
-global-styling:
+bootstrap:
+  version: 1.x
   css:
     theme:
-      #https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css: { type: external, minified: true }
-      includes/bootstrap/css/bootstrap-theme.css: {}
-      includes/bootstrap/css/bootstrap.css: {}
-      css/style.css: {}  
-global-js:
+      includes/bootstrap/css/bootstrap.min.css: {}
   js:
-   includes/bootstrap/js/bootstrap.js: {}
-   js/custom.js: {}
-   js/jsfile.js: {}   
+    includes/bootstrap/js/bootstrap.min.js: {}
   dependencies:
     - core/jquery
     - core/drupal.ajax
     - core/drupal
     - core/drupalSettings
     - core/jquery.once
-    - core/drupal.progress
-    - bootstrap/drupal.dialog
-    - bootstrap/modal    
+
+global-components:
+  Version: 1.x
+  css:
+    theme:
+      css/sm-core-css.css: {} 
+      css/font-awesome.css: {} 
+      css/style.css: {}      
+  js:  
+    js/jquery.smartmenus.min.js: {}
+    js/custom.js: {}
+    js/jsfile.js: {}
+    js/delicious.js: {}    
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once
+#global-styling:
+#  css:
+#    theme:
+#      #https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css: { type: external, minified: true }
+#      includes/bootstrap/css/bootstrap-theme.css: {}
+#      includes/bootstrap/css/bootstrap.css: {}
+#      css/style.css: {}  
+#global-js:
+#  js:
+#   includes/bootstrap/js/bootstrap.js: {}
+#   js/custom.js: {}
+#   js/jsfile.js: {}
+#   js/delicious.js: {}
+#   js/jquery.smartmenus.min.js: {}   
+#  dependencies:
+#    - core/jquery
+#    - core/drupal.ajax
+#    - core/drupal
+#    - core/drupalSettings
+#    - core/jquery.once
+#    - core/drupal.progress
+#    - bootstrap/drupal.dialog
+#    - bootstrap/modal    
       
         
  

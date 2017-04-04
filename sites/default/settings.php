@@ -765,3 +765,4 @@ $databases['default']['default'] = array (
 );
 $settings['install_profile'] = 'standard';
 $config_directories['sync'] = 'sites/default/files/config_rH6FsaRVsJsqLka7EqdUP_w6Molr4z7CYW4Uz1lWn8XiUr5h9RWd1zG1tOUvM-tNgHKA-rz8aQ/sync';
+//ini_set('memory_limit', '150M');

@@ -15,18 +15,18 @@ html{
     font-size: 14px;
     border-bottom: #e31837 4px solid !important;
     /* margin-top: 13px; */
-    
+
 }
 .navbar{
     margin-bottom: 0;
-    min-height: 75px;
+    min-height: 102px;
     background-image: none;
 }
 
 .navbar-fixed-top{
     top: 0;
     border-width: 0 0 1px;
- }
+}
 .section-powered-by {
     background-color: #e31837;
     border-top: 1px solid #f4a3af;
@@ -39,7 +39,7 @@ html{
     font-weight: bold;
     width: 100%;
 }
- .dropdown-menu{
+.dropdown-menu{
     background-color: #262626;
     opacity: .75;
 }
@@ -60,19 +60,24 @@ html{
 {
     margin-top: 35px;
 }
-a:hover{
+/*a:hover{
     color: navy;
     text-decoration: none;
-} 
+} */
 a:visited {
     color: #e31837;
     text-decoration: none;
 }
+ul.nav li.dropdown:hover ul.dropdown-menu {
+    display: block;
+}
+ul.nav li.dropdown ul.dropdown-menu {
+    margin-top: 0;
+}
+.align-right {float: right;}
 
 
-  
- 
-.banner{ 
+/*.banner{ 
     background-image: url("banner.jpg"); 
     background-repeat: no-repeat;
     background-size:cover;
@@ -83,17 +88,32 @@ a:visited {
 }
 .layout-container{
     
-}
-@media only screen and (max-width: 520px)
+}*/
+@media only screen and (min-width:0px )
 {
-    .container div banner{
-        width: 100%;
-        height:420px;
+    .bannerClass{
+        width:100%;
+        height: 707px;
+        background:url("../Image/banner-mobile.jpg") ;
+        margin-bottom: 7px;
     }
+ 
 }
-
+@media (min-width: 768px) {
+    .bannerClass{
+        width:100%;
+        height: 582px;
+        background:url("../Image/banner-desktop.jpg") ;
+        margin-bottom: 7px;
+    } 
+}
+/*todo  when desktop icon is used   
+.navbar-brand>img {
+     margin-top: 17px;
+}*/
+ 
 .powerbyclass {
-   background-color: #e31837;
+    background-color: #e31837;
     border-top: 1px solid #f4a3af;
     border-bottom: 1px solid #f4a3af;
     text-align: center;
@@ -124,37 +144,37 @@ a:visited {
 .footer-section { 
     background-color:#696969; 
     color:white;
-     
+
 }
- 
- #owl-demo .item{
-     background: whitesmoke;
-     adding: 30px 0px;
-     margin: 10px;
-     color: red;
-     border-radius: 50%;
-     text-align: center;
-     vertical-align: middle;
-     height: 125px;
-     width: 125px;
-     border:2px solid black;
-     margin-top:45px;
- }
- #owl-demo .item  img{
-     height: 25px;
-     width: 100px;
-     margin-top:20px;
-     margin-left:2px;
-     display:block;
- }
- .customNavigation{
-     text-align: center;
- }
-  .owl-pagination{
-      display: none;
-  }
-  
-  /*view slideshow styles STARTED*/
+
+#owl-demo .item{
+    background: whitesmoke;
+    adding: 30px 0px;
+    margin: 10px;
+    color: red;
+    border-radius: 50%;
+    text-align: center;
+    vertical-align: middle;
+    height: 125px;
+    width: 125px;
+    border:2px solid black;
+    margin-top:45px;
+}
+#owl-demo .item  img{
+    height: 25px;
+    width: 100px;
+    margin-top:20px;
+    margin-left:2px;
+    display:block;
+}
+.customNavigation{
+    text-align: center;
+}
+.owl-pagination{
+    display: none;
+}
+
+/*view slideshow styles STARTED*/
 div.views_slideshow_pager_field {
     bottom: 30px; float: left;
     position: relative;
@@ -190,10 +210,10 @@ div.views-content-title {
     width: 672px;
 }
 
- 
- 
-  /*view slideshow styles ENDED*/
-  .likepost {
+
+
+/*view slideshow styles ENDED*/
+.likepost {
     border-style: dotted;
     border-color: #98bf21;
     padding: 10px;
@@ -211,14 +231,7 @@ div.views-content-title {
     color: red;
 }
 
-
-.bannerClass{
-    width:100%;
-    height: 582px;;
-    background:url("../Image/analytics-projects.jpg") ;
-       
-}
 .container-fluid{
     padding:0;
 }
-         
+
