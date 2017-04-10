@@ -44,15 +44,17 @@ trait WebformDialogTrait {
    *   The webform with modal dialog support.
    */
   protected function buildFormDialog(array &$form, FormStateInterface $form_state) {
-    if ($this->isModalDialog()) {
-      $form['actions']['submit']['#ajax'] = [
-        'callback' => '::submitForm',
-        'event' => 'click',
-      ];
-      $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
-      $form['#prefix'] = '<div id="webform-dialog">';
-      $form['#suffix'] = '</div>';
+    if (!$this->isModalDialog()) {
+      return $form;
     }
+
+    $form['actions']['submit']['#ajax'] = [
+      'callback' => '::submitFormDialog',
+      'event' => 'click',
+    ];
+    $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
+    $form['#prefix'] = '<div id="webform-dialog">';
+    $form['#suffix'] = '</div>';
     return $form;
   }
 
@@ -68,34 +70,45 @@ trait WebformDialogTrait {
    *   The webform with modal dialog support.
    */
   protected function buildConfirmFormDialog(array &$form, FormStateInterface $form_state) {
-    // Replace 'Cancel' link button with a close dialog button.
-    if ($this->isModalDialog()) {
-      $form['actions']['cancel'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Cancel'),
-        '#submit' => ['::closeDialog'],
-        '#ajax' => [
-          'callback' => '::closeDialog',
-          'event' => 'click',
-        ],
-      ];
+    if (!$this->isModalDialog()) {
+      return $form;
     }
+
+    $this->buildFormDialog($form, $form_state);
+
+    // Replace 'Cancel' link button with a close dialog button.
+    $form['actions']['cancel'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Cancel'),
+      '#submit' => ['::noSubmit'],
+      '#limit_validation_errors' => [],
+      '#weight' => 100,
+      '#ajax' => [
+        'callback' => '::closeDialog',
+        'event' => 'click',
+      ],
+    ];
     return $form;
   }
 
+  /****************************************************************************/
+  // Ajax submit callbacks.
+  /****************************************************************************/
+
   /**
-   * Display validation error messages in modal dialog.
+   * Submit form dialog #ajax callback.
    *
    * @param array $form
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    *
-   * @return bool|\Drupal\Core\Ajax\AjaxResponse
-   *   An AJAX response that display validation error messages.
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An AJAX response that display validation error messages or redirects
+   *   to a URL
    */
-  protected function validateDialog(array &$form, FormStateInterface $form_state) {
-    if ($this->isModalDialog() && $form_state->hasAnyErrors()) {
+  public function submitFormDialog(array &$form, FormStateInterface $form_state) {
+    if ($form_state->hasAnyErrors()) {
       unset($form['#prefix'], $form['#suffix']);
       $form['status_messages'] = [
         '#type' => 'status_messages',
@@ -106,11 +119,23 @@ trait WebformDialogTrait {
       $response->addCommand(new ScrollTopCommand('#webform-dialog'));
       return $response;
     }
-    return FALSE;
+    else {
+      $response = new AjaxResponse();
+      if ($this->requestStack->getCurrentRequest()->get('destination')) {
+        $response->addCommand(new RedirectCommand($this->getRedirectDestination()->get()));
+      }
+      elseif ($redirect_url = $this->getRedirectUrl()) {
+        $response->addCommand(new RedirectCommand($redirect_url->toString()));
+      }
+      else {
+        $response->addCommand(new CloseDialogCommand());
+      }
+      return $response;
+    }
   }
 
   /**
-   * Handler close dialog.
+   * Close dialog #ajax callback.
    *
    * @param array $form
    *   An associative array containing the structure of the form.
@@ -127,29 +152,29 @@ trait WebformDialogTrait {
   }
 
   /**
-   * Handle dialog redirect after form is submitted.
+   * Empty submit callback used to only have the submit button to use an #ajax submit callback.
+   *
+   * This allows modal dialog to using ::submitCallback to validate and submit
+   * the form via one ajax required.
+   */
+  public function noSubmit(array &$form, FormStateInterface $form_state) {}
+
+  /**
+   * Get the form's redirect URL.
+   *
+   * Isolate a form's redirect URL/destination so that it can be used by
+   * ::submitFormDialog or ::submitForm.
    *
    * @param array $form
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
-   * @param \Drupal\Core\Url $url
-   *   Redirect URL.
    *
-   * @return \Drupal\Core\Ajax\AjaxResponse|null
-   *   An AJAX redirect response or null if redirection is being handled by the
-   *   $form_state.
+   * @return \Drupal\Core\Url|NULL
+   *   The redirect URL or NULL if dialog should just be closed.
    */
-  protected function redirectForm(array &$form, FormStateInterface $form_state, Url $url) {
-    if ($this->isModalDialog()) {
-      $response = new AjaxResponse();
-      $response->addCommand(new RedirectCommand($url->toString()));
-      return $response;
-    }
-    else {
-      $form_state->setRedirectUrl($url);
-      return NULL;
-    }
+  protected function getRedirectUrl() {
+    return NULL;
   }
 
 }

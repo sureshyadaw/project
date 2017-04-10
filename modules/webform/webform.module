@@ -24,12 +24,13 @@ use Drupal\webform\Element\WebformMessage;
 use Drupal\webform\Plugin\Field\FieldType\WebformEntityReferenceItem;
 use Drupal\webform\Plugin\WebformElement\ManagedFile;
 use Drupal\webform\Utility\WebformArrayHelper;
+use Drupal\webform\Utility\WebformThemeHelper;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionForm;
 
-module_load_include('inc', 'webform', 'includes/webform.libraries');
-module_load_include('inc', 'webform', 'includes/webform.options');
-module_load_include('inc', 'webform', 'includes/webform.translation');
+require_once __DIR__ . '/includes/webform.libraries.inc';
+require_once __DIR__ . '/includes/webform.options.inc';
+require_once __DIR__ . '/includes/webform.translation.inc';
 
 /**
  * Implements hook_help().
@@ -97,6 +98,14 @@ function webform_modules_uninstalled($modules) {
   /** @var \Drupal\webform\WebformEmailProviderInterface $email_provider */
   $email_provider = \Drupal::service('webform.email_provider');
   $email_provider->check();
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function webform_user_login($account) {
+  // Notify the storage of this log in.
+  \Drupal::entityTypeManager()->getStorage('webform_submission')->userLogin($account);
 }
 
 /**
@@ -271,10 +280,32 @@ function webform_mail($key, &$message, $params) {
   // value is used instead of site's email address.
   // See: \Drupal\Core\Mail\MailManager::mail.
   if (!empty($params['from_mail'])) {
-    $message['from'] = $params['from_mail'];
-    $message['headers']['From'] = $params['from_mail'];
-    $message['headers']['Reply-to'] = $params['from_mail'];
-    $message['headers']['Return-Path'] = $params['from_mail'];
+    $message['from'] = $message['headers']['From'] = (!empty($params['from_name'])) ? $params['from_name'] . ' <' . $params['from_mail'] . '>' : $params['from_mail'];
+  }
+
+  // Set header 'Reply-to'.
+  if (!empty($params['reply_to'])) {
+    $message['reply-to'] = $message['headers']['Reply-to'] = $params['reply_to'];
+  }
+  elseif ($default_reply_to = \Drupal::config('webform.settings')->get('mail.default_reply_to')) {
+    $message['reply-to'] = $message['headers']['Reply-to'] = $default_reply_to;
+  }
+  elseif (!empty($params['from_mail'])) {
+    // @todo Determine if the 'reply-to' must only be see to 'from mail' if
+    // 'from mail' has the same domain as the 'site mail'.
+    $message['reply-to'] = $message['headers']['Reply-to'] = $message['from'];
+  }
+
+  // Set header 'Return-Path'.
+  if (!empty($params['return_path'])) {
+    $message['headers']['Sender'] = $message['headers']['Return-Path'] = $params['return_path'];
+  }
+  elseif ($default_return_path = \Drupal::config('webform.settings')->get('mail.default_return_path')) {
+    $message['headers']['Sender'] = $message['headers']['Return-Path'] = $default_return_path;
+
+  }
+  elseif (!empty($params['from_mail'])) {
+    $message['headers']['Sender'] = $message['headers']['Return-Path'] = $params['from_mail'];
   }
 
   if (!empty($params['cc_mail'])) {
@@ -310,11 +341,11 @@ function webform_page_attachments(&$page) {
 
   // Attach global libraries only to webform specific pages.
   if (preg_match('/^(webform\.|^entity\.([^.]+\.)?webform)/', $route_name) || preg_match('#(/node/add/webform|/admin/help/webform)#', $url)) {
-    // Attach theme specific library to webform routers so that we can tweak
-    // the bartik.theme and seven.theme.
-    $theme = \Drupal::theme()->getActiveTheme()->getName();
-    if (file_exists(drupal_get_path('module', 'webform') . "/css/webform.theme.$theme.css")) {
-      $page['#attached']['library'][] = "webform/webform.theme.$theme";
+    $active_theme_names = WebformThemeHelper::getActiveThemeNames();
+    foreach ($active_theme_names as $active_theme_name) {
+      if (file_exists(drupal_get_path('module', 'webform') . "/css/webform.theme.$active_theme_name.css")) {
+        $page['#attached']['library'][] = "webform/webform.theme.$active_theme_name";
+      }
     }
 
     // Attach details element save open/close library.
@@ -587,6 +618,7 @@ function webform_theme_suggestions_alter(array &$suggestions, array $variables, 
     $suggestions[] = $hook . '__' . $webform->id();
   }
 }
+
 /**
  * Prepares variables for checkboxes templates.
  *

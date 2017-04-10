@@ -102,7 +102,7 @@ class WebformEntityHandlersForm extends EntityForm {
           'webform' => $this->entity->id(),
           'webform_handler' => $key,
         ]),
-        'attributes' => WebformDialogHelper::getModalDialogAttributes(640),
+        'attributes' => WebformDialogHelper::getModalDialogAttributes(700),
       ];
       $rows[$key]['operations'] = [
         '#type' => 'operations',
@@ -150,7 +150,7 @@ class WebformEntityHandlersForm extends EntityForm {
     ] + $rows;
 
     // Must preload libraries required by (modal) dialogs.
-    $form['#attached']['library'][] = 'webform/webform.admin.dialog';
+    WebformDialogHelper::attachLibraries($form);
 
     return parent::form($form, $form_state);
   }

@@ -232,12 +232,9 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   /****************************************************************************/
 
   /**
-   * Build the about section.
-   *
-   * @return array
-   *   An render array containing the about section.
+   * {@inheritdoc}
    */
-  protected function buildAbout() {
+  public function buildAbout() {
     return [
       'title' => [
         '#markup' => $this->t('About the Webform module'),
@@ -253,12 +250,9 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   }
 
   /**
-   * Build the eleents section.
-   *
-   * @return array
-   *   An render array containing the elements section.
+   * {@inheritdoc}
    */
-  protected function buildElements() {
+  public function buildElements($docs = FALSE) {
     $build = [
       'title' => [
         '#markup' => $this->t('Form elements'),
@@ -266,7 +260,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         '#suffix' => '</h3>',
       ],
       'content' => [
-        '#markup' => $this->t('Below is a list of all available form and render elements.'),
+        '#markup' => '<p>' . $this->t('Below is a list of all available form and render elements.') . '</p>',
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       ],
@@ -275,6 +269,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     $definitions = $this->elementManager->getDefinitions();
     $definitions = $this->elementManager->getSortedDefinitions($definitions, 'category');
     $grouped_definitions = $this->elementManager->getGroupedDefinitions($definitions);
+    unset($grouped_definitions['Other elements']);
     foreach ($grouped_definitions as $category_name => $elements) {
       $build['content'][$category_name]['title'] = [
         '#markup' => $category_name,
@@ -321,12 +316,9 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   }
 
   /**
-   * Build the uses section.
-   *
-   * @return array
-   *   An render array containing the uses section.
+   * {@inheritdoc}
    */
-  protected function buildUses() {
+  public function buildUses($docs = FALSE) {
     $build = [
       'title' => [
         '#markup' => $this->t('Uses'),
@@ -370,6 +362,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         'content' => [
           '#theme' => 'webform_help',
           '#info' => $help_info,
+          '#docs' => TRUE,
         ],
       ];
     }
@@ -377,12 +370,9 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   }
 
   /**
-   * Build the videos section.
-   *
-   * @return array
-   *   An render array containing the videos section.
+   * {@inheritdoc}
    */
-  protected function buildVideos() {
+  public function buildVideos($docs = FALSE) {
     $build = [
       'title' => [
         '#markup' => $this->t('Watch videos'),
@@ -398,33 +388,50 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         ],
       ],
     ];
-    foreach ($this->videos as $id => $video) {
-      // Title.
-      $build['content']['help'][$id]['title'] = [
-        '#markup' => $video['title'],
-        '#prefix' => '<dt>',
-        '#suffix' => '</dt>',
-      ];
-      // Content.
-      $build['content']['help'][$id]['content'] = [
-        '#prefix' => '<dd>',
-        '#suffix' => '</dd>',
-        'content' => [
-          '#theme' => 'webform_help',
-          '#info' => $video,
-        ],
-      ];
+    if ($docs) {
+      foreach ($this->videos as $id => $video) {
+        // Title.
+        $build['content']['help'][$id]['title'] = [
+          '#type' => 'link',
+          '#title' => $video['title'],
+          '#url' => Url::fromUri('https://www.youtube.com/watch', ['query' => ['v' => $video['youtube_id']]]),
+          '#prefix' => '<dt>',
+          '#suffix' => '</dt>',
+        ];
+        // Content.
+        $build['content']['help'][$id]['content'] = [
+          '#prefix' => '<dd>',
+          '#suffix' => '</dd>',
+          '#markup' => $video['content'],
+        ];
+      }
+    }
+    else {
+      foreach ($this->videos as $id => $video) {
+        // Title.
+        $build['content']['help'][$id]['title'] = [
+          '#markup' => $video['title'],
+          '#prefix' => '<dt>',
+          '#suffix' => '</dt>',
+        ];
+        // Content.
+        $build['content']['help'][$id]['content'] = [
+          '#prefix' => '<dd>',
+          '#suffix' => '</dd>',
+          'content' => [
+            '#theme' => 'webform_help',
+            '#info' => $video,
+          ],
+        ];
+      }
     }
     return $build;
   }
 
   /**
-   * Build the add-ons section.
-   *
-   * @return array
-   *   An render array containing the add-ons section.
+   * {@inheritdoc}
    */
-  protected function buildAddOns() {
+  public function buildAddOns($docs = FALSE) {
     // Libraries.
     $build = [
       'title' => [
@@ -433,7 +440,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         '#suffix' => '</h3>',
       ],
       'content' => [
-        '#markup' => $this->t("Below is a list of modules and projects that extend and/or provide additional functionality to the Webform module and Drupal's Form API."),
+        '#markup' => '<p>' . $this->t("Below is a list of modules and projects that extend and/or provide additional functionality to the Webform module and Drupal's Form API.") . '</p>',
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       ],
@@ -472,12 +479,9 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   }
 
   /**
-   * Build the libraries section.
-   *
-   * @return array
-   *   An render array containing the libraries section.
+   * {@inheritdoc}
    */
-  protected function buildLibraries() {
+  public function buildLibraries($docs = FALSE) {
     // Libraries.
     $build = [
       'title' => [
@@ -520,18 +524,21 @@ class WebformHelpManager implements WebformHelpManagerInterface {
   }
 
   /**
-   * Initialize videos.
-   *
-   * @return array
-   *   An associative array containing videos.
+   * {@inheritdoc}
    */
   protected function initVideos() {
     $videos = [];
 
-    $videos['introduction'] = [
+    $videos['introduction_short'] = [
       'title' => $this->t('Welcome to the Webform module'),
       'content' => $this->t('Welcome to the Webform module for Drupal 8.'),
-      'youtube_id' => 'sQGsfQ_LZJ4',
+      'youtube_id' => 'rJ-Hcg5WtSU',
+    ];
+
+    $videos['introduction'] = [
+      'title' => $this->t('Overview of the Webform module'),
+      'content' => $this->t('This screencast provides a complete introduction to the Webform module for Drupal 8.'),
+      'youtube_id' => 'AgaD041BTxU',
     ];
 
     $videos['installing'] = [
@@ -639,7 +646,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
 
     // Release.
     $module_info = Yaml::decode(file_get_contents($this->moduleHandler->getModule('webform')->getPathname()));
-    $version = isset($module_info['version']) ? $module_info['version'] : '8.x-5.x-dev';
+    $version = (isset($module_info['version']) && !preg_match('/^8.x-5.\d+-.*-dev$/', $module_info['version'])) ? $module_info['version'] : '8.x-5.x-dev';
     $installed_version = $this->state->get('webform.version');
     // Reset storage state if the version has changed.
     if ($installed_version != $version) {
@@ -718,6 +725,17 @@ class WebformHelpManager implements WebformHelpManagerInterface {
       'title' => $this->t('Managing results'),
       'url' => Url::fromRoute('entity.webform_submission.collection'),
       'content' => $this->t('The Results page lists all incoming submissions for all webforms.'),
+    ];
+
+    // Results.
+    $help['results'] = [
+      'routes' => [
+        // @see /admin/structure/webform/results/log
+        'entity.webform_submission.results_log',
+      ],
+      'title' => $this->t('Log'),
+      'url' => Url::fromRoute('entity.webform_submission.results_log'),
+      'content' => $this->t('The Log page lists all submission events for all webforms.'),
     ];
 
     // Settings.
@@ -808,7 +826,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
 
     // Webform elements.
     if (!$this->moduleHandler->moduleExists('webform_ui')) {
-      $help['form_elements_warning'] = [
+      $help['webform_elements_warning'] = [
         'routes' => [
           // @see /admin/structure/webform/manage/{webform}
           'entity.webform.edit_form',
@@ -823,7 +841,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
       ];
     }
 
-    $help['form_elements'] = [
+    $help['webform_elements'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}
         'entity.webform.edit_form',
@@ -834,7 +852,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform source.
-    $help['form_source'] = [
+    $help['webform_source'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/source
         'entity.webform.source_form',
@@ -846,7 +864,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform test.
-    $help['form_test'] = [
+    $help['webform_test'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/test
         'entity.webform.test',
@@ -859,7 +877,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform settings.
-    $help['form_settings'] = [
+    $help['webform_settings'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/settings
         'entity.webform.settings_form',
@@ -871,7 +889,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform assets.
-    $help['form_assets'] = [
+    $help['webform_assets'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/assets
         'entity.webform.assets_form',
@@ -881,7 +899,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform access controls.
-    $help['form_access'] = [
+    $help['webform_access'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/access
         'entity.webform.access_form',
@@ -892,7 +910,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform handlers.
-    $help['form_handlers'] = [
+    $help['webform_handlers'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/handlers
         'entity.webform.handlers_form',
@@ -905,7 +923,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform third party settings.
-    $help['form_third_party'] = [
+    $help['webform_third_party'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/third_party
         'entity.webform.third_party_settings_form',
@@ -915,7 +933,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     ];
 
     // Webform translations.
-    $help['form_translations'] = [
+    $help['webform_translations'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/translate
         'entity.webform.config_translation_overview',
@@ -930,7 +948,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     /****************************************************************************/
 
     // Webform results.
-    $help['form_results'] = [
+    $help['webform_results'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/results/submissions
         'entity.webform.results_submissions',
@@ -938,25 +956,25 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         'entity.node.webform.results_submissions',
       ],
       'title' => $this->t('Managing results'),
-      'content' => $this->t("The Results page displays an overview of a webform's submissions.") . ' ' .
+      'content' => $this->t("The Results page displays an overview of a webform's submissions. This page can be used to generate a customized report.") . ' ' .
       $this->t("Submissions can be reviewed, updated, flagged, annotated, and downloaded."),
       'video_id' => 'submissions',
     ];
 
-    // Webform results.
-    $help['form_table'] = [
+    // Webform log.
+    $help['webform_log'] = [
       'routes' => [
-        // @see /admin/structure/webform/manage/{webform}/results/table
-        'entity.webform.results_table',
-        // @see /node/{node}/webform/results/table
-        'entity.node.webform.results_table',
+        // @see /admin/structure/webform/manage/{webform}/results/log
+        'entity.webform.results_log',
+        // @see /node/{node}/webform/results/log
+        'entity.node.webform.results_log',
       ],
-      'title' => $this->t('Building a custom report'),
-      'content' => $this->t("The Table page provides a customizable table of a webform's submissions. This page can be used to generate a customized report."),
+      'title' => $this->t('Results log'),
+      'content' => $this->t('The Results log lists all logged webform submission events for the current webform.'),
     ];
 
     // Webform download.
-    $help['form_download'] = [
+    $help['webform_download'] = [
       'routes' => [
         // @see /admin/structure/webform/manage/{webform}/results/download
         'entity.webform.results_export',
@@ -969,7 +987,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
 
     if ($this->moduleHandler->moduleExists('webform_devel')) {
       // Webform Export.
-      $help['form_export'] = [
+      $help['webform_export'] = [
         'routes' => [
           // @see /admin/structure/webform/manage/{webform}/export
           'entity.webform.export_form',
@@ -980,6 +998,23 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         'video_id' => 'help',
       ];
     }
+
+    /****************************************************************************/
+    // Submission
+    /****************************************************************************/
+
+    // Log.
+    $help['submission_log'] = [
+      'routes' => [
+        // @see /admin/structure/webform/manage/{webform}/submission/{webform_submission}/log
+        'entity.webform_submission.log',
+        // @see /node/{node}/webform/submission/{webform_submission}/log
+        'entity.node.webform_submission.log',
+      ],
+      'title' => $this->t('Submission log'),
+      'url' => Url::fromRoute('entity.webform_submission.results_log'),
+      'content' => $this->t('The Submission log lists all events logged for this submission.'),
+    ];
 
     /****************************************************************************/
     // Modules

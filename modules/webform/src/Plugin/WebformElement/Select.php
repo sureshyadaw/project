@@ -62,6 +62,10 @@ class Select extends OptionsBase {
       $element['#attached']['library'][] = 'webform/webform.element.select2';
       $element['#attributes']['class'][] = 'js-webform-select2';
       $element['#attributes']['class'][] = 'webform-select2';
+      // Adding wrapper attributes so that we can fix bootstrap.theme.
+      // @see css/webform.theme.bootstrap.css
+      $element['#wrapper_attributes']['class'][] = 'form-type-select--select2';
+      $element['#wrapper_attributes']['class'][] = 'js-form-type-select--select2';
     }
   }
 
@@ -71,10 +75,10 @@ class Select extends OptionsBase {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['options']['select2'] = [
-      '#title' => $this->t('Select2'),
       '#type' => 'checkbox',
-      '#return_value' => TRUE,
+      '#title' => $this->t('Select2'),
       '#description' => $this->t('Replace select element with jQuery <a href=":href">Select2</a> box.', [':href' => 'https://select2.github.io/']),
+      '#return_value' => TRUE,
     ];
     return $form;
   }

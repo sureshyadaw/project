@@ -62,8 +62,8 @@ use Drupal\webform\WebformSubmissionStorageInterface;
  *     "delete-form" = "/admin/structure/webform/manage/{webform}/delete",
  *     "export-form" = "/admin/structure/webform/manage/{webform}/export",
  *     "results-submissions" = "/admin/structure/webform/manage/{webform}/results/submissions",
- *     "results-table" = "/admin/structure/webform/manage/{webform}/results/table",
  *     "results-export" = "/admin/structure/webform/manage/{webform}/results/download",
+ *     "results-log" = "/admin/structure/webform/manage/{webform}/results/log",
  *     "results-clear" = "/admin/structure/webform/manage/{webform}/results/clear",
  *     "collection" = "/admin/structure/webform",
  *   },
@@ -342,6 +342,13 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     else {
       $this->status = ((bool) $status) ? WebformInterface::STATUS_OPEN : WebformInterface::STATUS_CLOSED;
     }
+
+    // Clear open and close is status is not scheduled.
+    if ($this->status !== WebformInterface::STATUS_SCHEDULED) {
+      $this->open = NULL;
+      $this->close = NULL;
+    }
+
     return $this;
   }
 
@@ -374,10 +381,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
           $is_closed = TRUE;
         }
 
-        if ($is_opened && !$is_closed) {
-          return TRUE;
-        }
-        return FALSE;
+        return ($is_opened && !$is_closed) ? TRUE : FALSE;
     }
     return FALSE;
   }
@@ -394,6 +398,13 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
    */
   public function isScheduled() {
     return ($this->status === WebformInterface::STATUS_SCHEDULED);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOpening() {
+    return ($this->isScheduled() && ($this->open && strtotime($this->open) > time())) ? TRUE : FALSE;
   }
 
   /**
@@ -417,6 +428,13 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     /** @var \Drupal\webform\WebformSubmissionStorageInterface $submission_storage */
     $submission_storage = \Drupal::entityTypeManager()->getStorage('webform_submission');
     return ($submission_storage->getTotal($this)) ? TRUE : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasSubmissionLog() {
+    return \Drupal::config('webform.settings')->get('settings.default_submission_log') ?: $this->getSetting('submission_log') ?: FALSE;
   }
 
   /**
@@ -597,10 +615,12 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'form_submit_once' => FALSE,
       'form_submit_attributes' => [],
       'form_exception_message' => '',
-      'form_closed_message' => '',
+      'form_open_message' => '',
+      'form_close_message' => '',
       'form_previous_submissions' => TRUE,
       'form_confidential' => FALSE,
       'form_confidential_message' => '',
+      'form_convert_anonymous' => FALSE,
       'form_prepopulate' => FALSE,
       'form_prepopulate_source_entity' => FALSE,
       'form_disable_autocomplete' => FALSE,
@@ -609,6 +629,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'form_disable_back' => FALSE,
       'form_autofocus' => FALSE,
       'form_details_toggle' => FALSE,
+      'submission_log' => FALSE,
       'wizard_progress_bar' => TRUE,
       'wizard_progress_pages' => FALSE,
       'wizard_progress_percentage' => FALSE,
@@ -625,7 +646,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'preview_prev_button_label' => '',
       'preview_prev_button_attributes' => [],
       'preview_message' => '',
-      'draft' => FALSE,
+      'draft' => self::DRAFT_ENABLED_NONE,
       'draft_auto_save' => FALSE,
       'draft_button_label' => '',
       'draft_button_attributes' => [],
@@ -899,6 +920,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     $this->elementsInitializedFlattenedAndHasValue = [];
     $this->elementsTranslations = [];
     try {
+      $config_translation = \Drupal::moduleHandler()->moduleExists('config_translation');
       /** @var \Drupal\webform\WebformTranslationManagerInterface $translation_manager */
       $translation_manager = \Drupal::service('webform.translation_manager');
       /** @var \Drupal\Core\Language\LanguageManagerInterface $language_manager */
@@ -906,7 +928,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
 
       // If current webform is translated, load the base (default) webform and apply
       // the translation to the elements.
-      if ($this->langcode != $language_manager->getCurrentLanguage()->getId()) {
+      if ($config_translation && $this->langcode != $language_manager->getCurrentLanguage()->getId()) {
         $elements = $translation_manager->getConfigElements($this);
         $this->elementsTranslations = Yaml::decode($this->elements);
       }
@@ -1423,15 +1445,6 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function deleteWebformHandler(WebformHandlerInterface $handler) {
-    $this->getHandlers()->removeInstanceId($handler->getHandlerId());
-    $this->save();
-    return $this;
-  }
-
-  /**
    * Returns the webform handler plugin manager.
    *
    * @return \Drupal\Component\Plugin\PluginManagerInterface
@@ -1457,7 +1470,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       /** @var \Drupal\webform\WebformHandlerBase $handler */
       foreach ($this->handlersCollection as $handler) {
         // Initialize the handler and pass in the webform.
-        $handler->init($this);
+        $handler->setWebform($this);
       }
       $this->handlersCollection->sort();
     }
@@ -1515,9 +1528,38 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   /**
    * {@inheritdoc}
    */
-  public function addWebformHandler(array $configuration) {
-    $this->getHandlers()->addInstanceId($configuration['handler_id'], $configuration);
-    return $configuration['handler_id'];
+  public function addWebformHandler(WebformHandlerInterface $handler) {
+    $handler->setWebform($this);
+    $handler_id = $handler->getHandlerId();
+    $configuration = $handler->getConfiguration();
+    $this->getHandlers()->addInstanceId($handler_id, $configuration);
+    $this->save();
+    $handler->createHandler();
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updateWebformHandler(WebformHandlerInterface $handler) {
+    $handler->setWebform($this);
+    $handler_id = $handler->getHandlerId();
+    $configuration = $handler->getConfiguration();
+    $this->getHandlers()->setInstanceConfiguration($handler_id, $configuration);
+    $this->save();
+    $handler->updateHandler();
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteWebformHandler(WebformHandlerInterface $handler) {
+    $handler->setWebform($this);
+    $this->getHandlers()->removeInstanceId($handler->getHandlerId());
+    $handler->deleteHandler();
+    $this->save();
+    return $this;
   }
 
   /**

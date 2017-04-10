@@ -4,7 +4,6 @@ namespace Drupal\webform;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Database\Database;
-use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -166,7 +165,10 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
     $webform_submission_storage = $this->getStorage();
 
     $route_name = \Drupal::routeMatch()->getRouteName();
-    if ($route_name == "$base_route_name.webform.results_table") {
+    if ($route_name == "$base_route_name.webform.results_submissions") {
+      // Display submission properties and elements.
+      // @see /admin/structure/webform/manage/{webform}/results/submissions
+      // @see /node/{node}/webform/results/submissions
       $this->columns = $webform_submission_storage->getCustomColumns($this->webform, $this->sourceEntity, $this->account, TRUE);
       $this->sort = $webform_submission_storage->getCustomSetting('sort', 'serial', $this->webform, $this->sourceEntity);
       $this->direction = $webform_submission_storage->getCustomSetting('direction', 'desc', $this->webform, $this->sourceEntity);
@@ -183,6 +185,8 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
       }
     }
     else {
+      // Display only submission properties.
+      // @see /admin/structure/webform/results/manage
       $this->columns = $webform_submission_storage->getDefaultColumns($this->webform, $this->sourceEntity, $this->account, FALSE);
       if ($route_name == 'entity.webform_submission.collection') {
         // Replace serial with sid when showing results from all webforms.
@@ -237,7 +241,7 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
 
     // Customize.
     if ($this->customize) {
-      $route_name = $this->requestHandler->getRouteName($this->webform, $this->sourceEntity, 'webform.results_table.custom');
+      $route_name = $this->requestHandler->getRouteName($this->webform, $this->sourceEntity, 'webform.results_submissions.custom');
       $route_parameters = $this->requestHandler->getRouteParameters($this->webform, $this->sourceEntity) + ['webform' => $this->webform->id()];
       $route_options = ['query' => \Drupal::destination()->getAsArray()];
       $build['custom'] = [
@@ -255,7 +259,7 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
     $build['#attached']['library'][] = 'webform/webform.admin';
 
     // Must preload libraries required by (modal) dialogs.
-    $build['#attached']['library'][] = 'webform/webform.admin.dialog';
+    WebformDialogHelper::attachLibraries($build);
 
     return $build;
   }
@@ -409,7 +413,7 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
             '#type' => 'link',
             '#title' => new FormattableMarkup('<span class="webform-icon webform-icon-notes webform-icon-notes--@state"></span>', ['@state' => $state]),
             '#url' => Url::fromRoute($route_name, $route_parameters, $route_options),
-            '#attributes' => WebformDialogHelper::getModalDialogAttributes(640),
+            '#attributes' => WebformDialogHelper::getModalDialogAttributes(700),
           ],
           'class' => ['webform-results__icon'],
         ];
@@ -533,6 +537,14 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
       ];
     }
 
+    if ($entity->access('view_any') && \Drupal::currentUser()->hasPermission('access webform submission log')) {
+      $operations['log'] = [
+        'title' => $this->t('Log'),
+        'weight' => 100,
+        'url' => Url::fromRoute("$base_route_name.webform_submission.log", $route_parameters, $route_options),
+      ];
+    }
+
     return $operations;
   }
 
@@ -639,15 +651,17 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
    *   An entity query.
    */
   protected function getQuery($keys = '', $state = '') {
-    $query = $this->getStorage()->getQuery();
-    $this->addQueryConditions($query);
+    /** @var \Drupal\webform\WebformSubmissionStorageInterface $submission_storage */
+    $submission_storage = $this->getStorage();
+    $query = $submission_storage->getQuery();
+    $submission_storage->addQueryConditions($query, $this->webform, $this->sourceEntity, $this->account);
 
     // Filter by key(word).
     if ($keys) {
       $sub_query = Database::getConnection()->select('webform_submission_data', 'sd')
         ->fields('sd', ['sid'])
         ->condition('value', '%' . $keys . '%', 'LIKE');
-      $this->addQueryConditions($sub_query);
+      $submission_storage->addQueryConditions($sub_query, $this->webform, $this->sourceEntity, $this->account);
 
       $or = $query->orConditionGroup()
         ->condition('sid', $sub_query, 'IN')
@@ -662,30 +676,6 @@ class WebformSubmissionListBuilder extends EntityListBuilder {
     }
 
     return $query;
-  }
-
-  /**
-   * Add webform, account, and source entity conditions to a query.
-   *
-   * @param \Drupal\Core\Database\Query\AlterableInterface $query
-   *   The query to execute.
-   */
-  protected function addQueryConditions(AlterableInterface $query) {
-    // Limit submission to the current webform.
-    if ($this->webform) {
-      $query->condition('webform_id', $this->webform->id());
-    }
-
-    // Limit submission to the current user.
-    if ($this->account) {
-      $query->condition('uid', $this->account->id());
-    }
-
-    // Filter entity type and id. (Currently only applies to webform_node.module)
-    if ($this->sourceEntity) {
-      $query->condition('entity_type', $this->sourceEntity->getEntityTypeId());
-      $query->condition('entity_id', $this->sourceEntity->id());
-    }
   }
 
 }

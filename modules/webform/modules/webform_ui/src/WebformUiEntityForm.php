@@ -124,9 +124,13 @@ class WebformUiEntityForm extends WebformEntityForm {
       }
 
       $rows[$key]['title'] = [
-        '#markup' => $element['#admin_title'] ?: $element['#title'],
+        '#type' => 'link',
+        '#title' => $element['#admin_title'] ?: $element['#title'],
+        '#url' => new Url('entity.webform_ui.element.edit_form', ['webform' => $webform->id(), 'key' => $key]),
+        '#attributes' => $element_dialog_attributes,
         '#prefix' => !empty($indentation) ? $this->renderer->render($indentation) : '',
       ];
+
       if ($is_container) {
         $route_parameters = [
           'webform' => $webform->id(),
@@ -229,7 +233,7 @@ class WebformUiEntityForm extends WebformEntityForm {
             'webform' => $webform->id(),
             'key' => $key,
           ]),
-          'attributes' => WebformDialogHelper::getModalDialogAttributes(640),
+          'attributes' => WebformDialogHelper::getModalDialogAttributes(700),
         ];
       }
     }
@@ -290,9 +294,8 @@ class WebformUiEntityForm extends WebformEntityForm {
     ] + $rows;
 
     // Must preload libraries required by (modal) dialogs.
-    $form['#attached']['library'][] = 'webform/webform.admin.dialog';
+    WebformDialogHelper::attachLibraries($form);
     $form['#attached']['library'][] = 'webform_ui/webform_ui';
-
     return $form;
   }
 

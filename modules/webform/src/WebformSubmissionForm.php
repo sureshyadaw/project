@@ -196,15 +196,21 @@ class WebformSubmissionForm extends ContentEntityForm {
     $webform_submission = $this->getEntity();
     $webform = $this->getWebform();
 
+    // Add this webform and the webform settings to the cache tags.
+    $form['#cache']['tags'][] = 'config:webform.settings';
+
     // This submission webform is based on the current URL, and hence it depends
     // on the 'url' cache context.
     $form['#cache']['contexts'][] = 'url';
 
-    // Add this webform and the webform settings to the cache tags.
-    $form['#cache']['tags'][] = 'config:webform.settings';
+    // All anonymous submissions are tracked in the $_SESSION.
+    // @see \Drupal\webform\WebformSubmissionStorage::setAnonymousSubmission
+    if ($this->currentUser()->isAnonymous()) {
+      $form['#cache']['contexts'][] = 'session';
+    }
 
     // Add the webform as a cacheable dependency.
-    \Drupal::service('renderer')->addCacheableDependency($form, $this->getWebform());
+    \Drupal::service('renderer')->addCacheableDependency($form, $webform);
 
     // Display status messages.
     $this->displayMessages($form, $form_state);
@@ -218,6 +224,7 @@ class WebformSubmissionForm extends ContentEntityForm {
     // Call custom webform alter hook.
     $form_id = $this->getFormId();
     $this->thirdPartySettingsManager->alter('webform_submission_form', $form, $form_state, $form_id);
+
     return $form;
   }
 
@@ -424,7 +431,12 @@ class WebformSubmissionForm extends ContentEntityForm {
         $this->messageManager->display(WebformMessageManagerInterface::ADMIN_ACCESS, 'warning');
       }
       else {
-        $form['closed'] = $this->messageManager->build(WebformMessageManagerInterface::FORM_CLOSED_MESSAGE);
+        if ($webform->isOpening()) {
+          $form['opening'] = $this->messageManager->build(WebformMessageManagerInterface::FORM_OPEN_MESSAGE);
+        }
+        else {
+          $form['closed'] = $this->messageManager->build(WebformMessageManagerInterface::FORM_CLOSE_MESSAGE);
+        }
         return $form;
       }
     }
@@ -509,7 +521,7 @@ class WebformSubmissionForm extends ContentEntityForm {
     if ($this->isGet()
       && $this->getWebformSetting('form_previous_submissions', FALSE)
       && ($this->isRoute('entity.webform.canonical') || $this->isWebformEntityReferenceFromSourceEntity())
-      && $webform->access('submission_view_own')
+      && ($webform->access('submission_view_own') || $this->currentUser()->hasPermission('view own webform submission'))
       && ($previous_total = $this->storage->getTotal($webform, $this->sourceEntity, $this->currentUser()))
     ) {
       if ($previous_total > 1) {
@@ -1350,7 +1362,7 @@ class WebformSubmissionForm extends ContentEntityForm {
   protected function checkTotalLimit() {
     $webform = $this->getWebform();
 
-    // Check per entity total limit.
+    // Check per source entity total limit.
     $entity_limit_total = $this->getWebformSetting('entity_limit_total');
     if ($entity_limit_total && ($source_entity = $this->getLimitSourceEntity())) {
       if ($this->storage->getTotal($webform, $source_entity) >= $entity_limit_total) {
@@ -1382,7 +1394,7 @@ class WebformSubmissionForm extends ContentEntityForm {
       return FALSE;
     }
 
-    // Check per entity user limit.
+    // Check per source entity user limit.
     $entity_limit_user = $this->getWebformSetting('entity_limit_user');
     if ($entity_limit_user && ($source_entity = $this->getLimitSourceEntity())) {
       if ($this->storage->getTotal($webform, $source_entity, $account) >= $entity_limit_user) {
@@ -1406,8 +1418,30 @@ class WebformSubmissionForm extends ContentEntityForm {
    *   TRUE if drafts are enabled.
    */
   protected function draftEnabled() {
-    $account = $this->currentUser();
-    return ($account->isAuthenticated() && $this->getWebformSetting('draft') && !$this->getWebformSetting('results_disabled')) ? TRUE : FALSE;
+    // Can't saved drafts when saving results is disabled.
+    if ($this->getWebformSetting('results_disabled')) {
+      return FALSE;
+    }
+
+    /** @var WebformSubmissionInterface $webform_submission */
+    $webform_submission = $this->getEntity();
+
+    // Once a form is completed drafts are no longer applicable.
+    if ($webform_submission->isCompleted()) {
+      return FALSE;
+    }
+
+    switch ($this->getWebformSetting('draft')) {
+      case WebformInterface::DRAFT_ENABLED_ALL:
+        return TRUE;
+
+      case WebformInterface::DRAFT_ENABLED_AUTHENTICATED:
+        return $webform_submission->getOwner()->isAuthenticated();
+
+      case WebformInterface::DRAFT_ENABLED_NONE:
+      default:
+        return FALSE;
+    }
   }
 
   /**

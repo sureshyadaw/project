@@ -18,7 +18,8 @@ global-components:
     theme:
       css/sm-core-css.css: {} 
       css/font-awesome.css: {} 
-      css/style.css: {}      
+      css/style.css: {}
+      css/carousal.css: {}
   js:  
     js/jquery.smartmenus.min.js: {}
     js/custom.js: {}

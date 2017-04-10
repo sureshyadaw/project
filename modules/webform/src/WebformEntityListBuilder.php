@@ -65,7 +65,7 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
     // actions and add the needed dialog attributes.
     // @see https://www.drupal.org/node/2585169
     if ($this->moduleHandler()->moduleExists('webform_ui')) {
-      $add_form_attributes = WebformDialogHelper::getModalDialogAttributes(640, ['button', 'button-action', 'button--primary', 'button--small']);
+      $add_form_attributes = WebformDialogHelper::getModalDialogAttributes(700, ['button', 'button-action', 'button--primary', 'button--small']);
     }
     else {
       $add_form_attributes = ['class' => ['button', 'button-action', 'button--primary', 'button--small']];
@@ -92,23 +92,22 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
     $build['filter_form'] = \Drupal::formBuilder()->getForm('\Drupal\webform\Form\WebformEntityFilterForm', $this->keys, $this->state, $state_options);
 
     // Display info.
-    if ($this->isAdmin()) {
-      if ($total = $this->getTotal($this->keys, $this->state)) {
-        $t_args = [
-          '@total' => $total,
-          '@results' => $this->formatPlural($total, $this->t('webform'), $this->t('webforms')),
-        ];
-        $build['info'] = [
-          '#markup' => $this->t('@total @results', $t_args),
-          '#prefix' => '<div>',
-          '#suffix' => '</div>',
-        ];
-      }
+    if ($total = $this->getTotal($this->keys, $this->state)) {
+      $t_args = [
+        '@total' => $total,
+        '@results' => $this->formatPlural($total, $this->t('webform'), $this->t('webforms')),
+      ];
+      $build['info'] = [
+        '#markup' => $this->t('@total @results', $t_args),
+        '#prefix' => '<div>',
+        '#suffix' => '</div>',
+      ];
     }
+
     $build += parent::render();
 
     // Must preload libraries required by (modal) dialogs.
-    $build['#attached']['library'][] = 'webform/webform.admin.dialog';
+    WebformDialogHelper::attachLibraries($build);
 
     return $build;
   }
@@ -197,10 +196,6 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
           'title' => $this->t('Submissions'),
           'url' => Url::fromRoute('entity.webform.results_submissions', $route_parameters),
         ];
-        $operations['table'] = [
-          'title' => $this->t('Table'),
-          'url' => Url::fromRoute('entity.webform.results_table', $route_parameters),
-        ];
         $operations['export'] = [
           'title' => $this->t('Download'),
           'url' => Url::fromRoute('entity.webform.results_export', $route_parameters),
@@ -234,9 +229,13 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
           'title' => $this->t('Duplicate'),
           'weight' => 23,
           'url' => Url::fromRoute('entity.webform.duplicate_form', $route_parameters),
-          'attributes' => WebformDialogHelper::getModalDialogAttributes(640),
+          'attributes' => WebformDialogHelper::getModalDialogAttributes(700),
         ];
       }
+      if (isset($operations['delete'])) {
+        $operations['delete']['attributes'] = WebformDialogHelper::getModalDialogAttributes(700);
+      }
+
     }
     return $operations;
   }

@@ -1,0 +1,161 @@
+
+/*
+ * jquery.rs.carousel.css 1.0.2
+ * https://github.com/richardscarrott/jquery-ui-carousel
+ *
+ * Copyright (c) 2013 Richard Scarrott
+ * http://www.richardscarrott.co.uk
+ *
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Depends:
+ *  a basic reset + items must have width & height
+ */
+
+.rs-carousel-mask {
+    overflow: hidden;
+}
+
+.rs-carousel-runner {
+    position: relative;
+}
+
+.rs-carousel-horizontal .rs-carousel-item {
+    float: left;
+
+}
+/*to do fixed the size of image */
+/*.rs-carousel-horizontal >.rs-carousel-item >.views-field-field-image >.field-content {
+    float: left;
+    width: 450px;
+    height: 450px;
+    color: #fff;
+    font-size: 8em;
+    text-align: center;
+    margin: 0; 
+}*/
+ 
+
+.rs-carousel-mask {
+    position: relative;
+}
+
+.rs-carousel-runner {
+    -moz-transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.rs-carousel-transition .rs-carousel-runner {
+    -moz-transition: -moz-transform .400s ease;
+    -webkit-transition: -webkit-transform .400s ease;
+    -o-transition: -o-transform .400s ease;
+    -ms-transition: -ms-transform .400s ease;
+    transition: transform .400s ease;
+}
+/* layout */
+#container {
+    position: relative;
+    width: 80%;
+}
+
+/* rs carousel */
+#rs-carousel .rs-carousel-mask {
+    border: 6px solid #444;
+}
+
+#rs-carousel ul li {
+    color: #fff;
+    font-size: 8em;
+    text-align: center;
+    width: 150px;
+    height: 150px;
+}
+
+#rs-carousel .rs-carousel-action {
+    color: gray;
+    cursor: default;
+}
+
+#rs-carousel .rs-carousel-action-active {
+    color: #1788D7;
+    cursor: pointer;
+}
+
+#rs-carousel .rs-carousel-pagination-link {
+    display:inline;
+}
+
+#rs-carousel .rs-carousel-pagination-link a {
+    padding: 2px 6px;
+}
+
+#rs-carousel .rs-carousel-pagination-link a:hover {
+    text-decoration: none;
+}
+
+#rs-carousel .rs-carousel-pagination-link-active a {
+    background: #444;
+    color: #fff;
+}
+
+#rs-carousel .rs-carousel-pagination-disabled .rs-carousel-pagination-link a,
+#rs-carousel .rs-carousel-action-disabled.rs-carousel-action {
+    color: gray;
+    cursor: default;
+}
+
+/** horizontal **/
+#rs-carousel .rs-carousel-horizontal .rs-carousel-items-1 .rs-carousel-mask {
+    width: 150px;
+        height: 50px;
+}
+
+#rs-carousel .rs-carousel-horizontal .rs-carousel-items-2 .rs-carousel-mask {
+    width: 300px;
+    height: 50px;
+}
+
+#rs-carousel .rs-carousel-horizontal .rs-carousel-items-3 .rs-carousel-mask {
+    width: 450px;    height: 50px;
+}
+
+#rs-carousel.rs-carousel-horizontal.rs-carousel-items-4 .rs-carousel-mask {
+    width: 600px;    height: 50px;
+}
+
+/** vertical **/
+#rs-carousel.rs-carousel-vertical .rs-carousel-mask {
+    width: 150px;
+    height: 500px;
+}
+
+#rs-carousel.rs-carousel-vertical.rs-carousel-items-1 .rs-carousel-mask {
+    height: 150px;
+}
+
+#rs-carousel.rs-carousel-vertical.rs-carousel-items-2 .rs-carousel-mask {
+    height: 300px;
+}
+
+#rs-carousel.rs-carousel-vertical.rs-carousel-items-3 .rs-carousel-mask {
+    height: 450px;
+}
+
+#rs-carousel.rs-carousel-vertical.rs-carousel-items-4 .rs-carousel-mask {
+    height: 600px;
+}
+
+ 
+.rs-carousel-item-clone {
+       width: 150px;
+    height: 150px;
+    color: #fff;
+    font-size: 8em;
+    text-align: center;
+    margin: 0; 
+}
